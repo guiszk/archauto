@@ -108,3 +108,7 @@ mv /etc/sudoers /etc/sudoers.bac
 # ADD USER TO SUDOERS GROUP
 sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
 
+# UNSET VARIABLES
+unset DISK
+unset UUID
+unset UNAME
