@@ -1,11 +1,5 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]
-  then
-    echo "Run as root."
-    exit 1
-fi
-
 if [ $# -ne 1 ]
   then
     echo "./archauto.sh <disk>"
@@ -40,13 +34,21 @@ sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/H
 mkinitcpio -p linux
 
 # USER
+pwcheck () {
+    passwd $1
+    if [ $? -eq 10 ]; then
+        pwcheck $1
+    fi
+}
 echo -n "Enter username: "
 read UNAME
 useradd -m -G audio,video,wheel $UNAME
 echo "Changing user password."
-passwd $UNAME
+pwcheck $UNAME
+#passwd $UNAME
 echo "Changing root password."
-passwd
+pwcheck
+#passwd
 
 # BACKUP SUDOERS
 mv /etc/sudoers /etc/sudoers.bac
