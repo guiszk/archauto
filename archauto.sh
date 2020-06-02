@@ -78,35 +78,38 @@ export UUID
 genfstab -U /mnt > /mnt/etc/fstab
 
 # CHROOT
-arch-chroot /mnt
+#arch-chroot /mnt
 
 # SETUP BOOTLOADER
-cd
-bootctl install
-mv /boot/loader/loader.conf /boot/loader/loader.conf.bac
-echo -e "timeout 5\ndefault arch" > /boot/loader/loader.conf
-echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"options rw cryptdevice=UUID=$UUID":crypt" root=/dev/mapper/crypt > /boot/loader/entries/arch.conf
+arch-chroot /mnt cd
+arch-chroot /mnt bootctl install
+arch-chroot /mnt mv /boot/loader/loader.conf /boot/loader/loader.conf.bac
+arch-chroot /mnt echo -e "timeout 5\ndefault arch" > /boot/loader/loader.conf
+arch-chroot /mnt echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"options rw cryptdevice=UUID=$UUID":crypt" root=/dev/mapper/crypt > /boot/loader/entries/arch.conf
 
 # MKINITCPIO
-#sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
-cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bac
-sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf resume shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
-mkinitcpio -p linux
+arch-chroot /mnt #sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
+arch-chroot /mnt cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bac
+arch-chroot /mnt sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf resume shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
+arch-chroot /mnt mkinitcpio -p linux
 
 # USER
-echo -n "Enter username: "
-read UNAME
-useradd -m -G audio,video,wheel $UNAME
-echo "Changing user password."
-passwd $UNAME
-echo "Changing root password."
-passwd
+arch-chroot /mnt echo -n "Enter username: "
+arch-chroot /mnt read UNAME
+arch-chroot /mnt useradd -m -G audio,video,wheel $UNAME
+arch-chroot /mnt echo "Changing user password."
+arch-chroot /mnt passwd $UNAME
+arch-chroot /mnt echo "Changing root password."
+arch-chroot /mnt passwd
 
 # BACKUP SUDOERS
-mv /etc/sudoers /etc/sudoers.bac
-
+arch-chroot /mnt mv /etc/sudoers /etc/sudoers.bac
+arch-chroot /mnt
 # ADD USER TO SUDOERS GROUP
-sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
+arch-chroot /mnt sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
+
+# EXIT CHROOT
+#exit
 
 # UNSET VARIABLES
 unset DISK
