@@ -68,7 +68,7 @@ swapon $DISK\3
 pacman -Syy
 
 # INSTALL
-time pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vi vim pacman dhcpcd net-tools terminator
+time pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vi vim pacman dhcpcd git net-tools terminator
 
 # GET ENCRYPTED DISK UUID
 UUID="$(blkid -s UUID -o value $DISK\2)"
@@ -83,6 +83,7 @@ arch-chroot /mnt
 # SETUP BOOTLOADER
 cd
 bootctl install
+mv /boot/loader/loader.conf /boot/loader/loader.conf.bac
 echo -e "timeout 5\ndefault arch" > /boot/loader/loader.conf
 echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"options rw cryptdevice=UUID=$UUID":crypt" root=/dev/mapper/crypt > /boot/loader/entries/arch.conf
 
