@@ -27,6 +27,9 @@ if [ -z "$UUID" ]; then
 	exit 1
 fi
 
+# START TIMER
+SECONDS=0
+
 # PARTITION DISKS
 echo "o \nY \nn \n1 \n \n_512M \nEF00 \nn \n3 \n \n+1G \n8200 \nn \n2 \n \n \n8300 \nw \nY" | gdisk $DISK
 
@@ -104,7 +107,7 @@ arch-chroot /mnt passwd
 
 # BACKUP SUDOERS
 arch-chroot /mnt mv /etc/sudoers /etc/sudoers.bac
-arch-chroot /mnt
+
 # ADD USER TO SUDOERS GROUP
 arch-chroot /mnt sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
 
@@ -115,3 +118,7 @@ arch-chroot /mnt sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
 unset DISK
 unset UUID
 unset UNAME
+
+# STOP TIMER
+DURATION=$SECONDS
+echo "$(($DURATION / 60))m $(($DURATION % 60))s"
