@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$EUID" -ne 0 ]
   then
@@ -20,8 +20,9 @@ fi
 
 DISK=$1
 UUID="$(blkid -s UUID -o value $DISK)"
+export DISK
 
-if [ -z "$uuid" ]; then
+if [ -z "$UUID" ]; then
 	echo "Invalid disk"
 	exit 1
 fi
@@ -34,8 +35,20 @@ mkfs.fat -F32 $DISK\1
 mkswap $DISK\3
 
 # ENCRYPT DISKS
-cryptsetup -y -v luksFormat $DISK
-cryptsetup open $DISK crypt
+mkcrypt () {
+    cryptsetup -y -v luksFormat $DISK\2
+    if [ $? -eq  2 ]; then
+        mkcrypt
+    fi
+}
+opcrypt () {
+    cryptsetup open $DISK\2 crypt
+    if [ $? -eq  2 ]; then
+        opcrypt
+    fi
+}
+mkcrypt
+opcrypt
 
 # FORMAT ENCRYPTED PARTITION
 mkfs.ext4 -O "^has_journal" /dev/mapper/crypt
@@ -44,15 +57,25 @@ mkfs.ext4 -O "^has_journal" /dev/mapper/crypt
 mount /dev/mapper/crypt /mnt
 if [ -d /mnt/boot ]
     then
-        mount $DISK\1 /mnt /boot
+        mount $DISK\1 /mnt/boot
     else
         mkdir /mnt/boot
-        mount $DISK\1 /mnt /boot
+        mount $DISK\1 /mnt/boot
 fi
 swapon $DISK\3
 
+# UPDATE REPOS
+pacman -Syy
+
 # INSTALL
-pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vim pacman dhcpcd net-tools terminator
+time pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vi vim pacman dhcpcd net-tools terminator
+
+# GET ENCRYPTED DISK UUID
+UUID="$(blkid -s UUID -o value $DISK\2)"
+export UUID
+
+# CONFIGURE FSTAB
+genfstab -U /mnt > /mnt/etc/fstab
 
 # CHROOT
 arch-chroot /mnt
@@ -60,11 +83,27 @@ arch-chroot /mnt
 # SETUP BOOTLOADER
 cd
 bootctl install
-cd /boot
-echo -e "title ArchLinux\ntimeout 5" > loader.conf
-cd /boot/entries/
-echo -e "title Linux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\noptions rw cryptdevice=UUID=$UUID:crypt root=/dev/mapper/crypt" > arch.conf
+echo -e "timeout 5\ndefault arch" > /boot/loader/loader.conf
+echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"options rw cryptdevice=UUID=$UUID":crypt" root=/dev/mapper/crypt > /boot/loader/entries/arch.conf
 
 # MKINITCPIO
-sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
+#sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
+cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bac
+sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf resume shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
 mkinitcpio -p linux
+
+# USER
+echo -n "Enter username: "
+read UNAME
+useradd -m -G audio,video,wheel $UNAME
+echo "Changing user password."
+passwd $UNAME
+echo "Changing root password."
+passwd
+
+# BACKUP SUDOERS
+mv /etc/sudoers /etc/sudoers.bac
+
+# ADD USER TO SUDOERS GROUP
+sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
+
