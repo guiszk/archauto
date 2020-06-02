@@ -85,7 +85,7 @@ export UUID
 genfstab -U /mnt > /mnt/etc/fstab
 
 # ADD SCRIPT TO CHROOT
-cp .chrootauto.sh /mnt/usr/local/bin/chrootauto
+cp ./chrootauto.sh /mnt/usr/local/bin/chrootauto
 
 # RUN SCRIPT
 arch-chroot /mnt chrootauto $DISK\2
