@@ -19,7 +19,7 @@ if [ $# -ne 1 ]
 fi
 
 DISK=$1
-UUID="$(blkid -s UUID -o value $DISK)"
+UUID="$(blkid -s UUID -o value $DISK\1)"
 export DISK
 
 if [ -z "$UUID" ]; then
