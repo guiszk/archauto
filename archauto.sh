@@ -52,7 +52,7 @@ fi
 swapon $DISK\3
 
 # INSTALL
-pacstrap /mnt base base-devel vim pacman dhcpcd net-tools terminator
+pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vim pacman dhcpcd net-tools terminator
 
 # CHROOT
 arch-chroot /mnt
@@ -60,7 +60,11 @@ arch-chroot /mnt
 # SETUP BOOTLOADER
 cd
 bootctl install
-asdf cd /boot
+cd /boot
+echo -e "title ArchLinux\ntimeout 5" > loader.conf
+cd /boot/entries/
+echo -e "title Linux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\noptions rw cryptdevice=UUID=$UUID:crypt root=/dev/mapper/crypt" > arch.conf
 
-echo -e '"title Linux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\noptions rw cryptdevice=UUID=$UUID:crypt root=/dev/mapper/crypt" > arch.conf'
-
+# MKINITCPIO
+sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
+mkinitcpio -p linux
