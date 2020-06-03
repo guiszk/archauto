@@ -88,7 +88,7 @@ genfstab -U /mnt > /mnt/etc/fstab
 cp ./chrootauto.sh /mnt/usr/local/bin/chrootauto
 
 # RUN SCRIPT
-arch-chroot /mnt chrootauto $DISK\2
+arch-chroot /mnt chrootauto $DISK
 
 # CHROOT
 #
