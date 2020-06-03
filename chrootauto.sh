@@ -15,22 +15,34 @@ if [ -z "$UUID" ]; then
 	exit 1
 fi
 
+msg () {
+    echo $1; read
+}
+
 # GET ENCRYPTED DISK UUID
 UUID="$(blkid -s UUID -o value $DISK\2)"
 export UUID
 
 # SETUP BOOTLOADER
 cd
+msg "Installing bootctl..."
 bootctl install
+msg "Backing up loader.conf..."
 cp /boot/loader/loader.conf /boot/loader/loader.conf.bac
+msg "Generating loader.conf file..."
 echo -e "timeout 5\ndefault arch" > /boot/loader/loader.conf
+msg "Creating arch.conf file..."
 touch /boot/loader/entries/arch.conf
+msg "Generating arch.conf file..."
 echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"options rw cryptdevice=UUID=$UUID":crypt" root=/dev/mapper/crypt > /boot/loader/entries/arch.conf
 
 # MKINITCPIO
 #sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
+msg "Backing up mkinitcpio..."
 cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bac
+msg "Generating mkinitcpio..."
 sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf resume shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
+msg "Running mkinitcpio..."
 mkinitcpio -p linux
 
 # USER
@@ -42,6 +54,7 @@ pwcheck () {
 }
 echo -n "Enter username: "
 read UNAME
+msg "Creating user..."
 useradd -m -G audio,video,wheel $UNAME
 echo "Changing user password."
 pwcheck $UNAME
@@ -51,10 +64,13 @@ pwcheck
 #passwd
 
 # BACKUP SUDOERS
+msg "Backing up sudoers..."
 mv /etc/sudoers /etc/sudoers.bac
 
 # ADD USER TO SUDOERS GROUP
+msg "Editing sudoers..."
 sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
 
 # EXIT CHROOT
+msg "Exiting chroot..."
 exit

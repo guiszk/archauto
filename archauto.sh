@@ -30,18 +30,27 @@ fi
 # START TIMER
 SECONDS=0
 
+msg () {
+    echo $1; read
+}
+
 # UNMOUNT DISKS
+msg "Unmounting disks..."
 umount /mnt/boot
 umount /mnt
 
 # PARTITION DISKS
+msg "Partitioning disks..."
 echo "o \nY \nn \n1 \n \n_512M \nEF00 \nn \n3 \n \n+1G \n8200 \nn \n2 \n \n \n8300 \nw \nY" | gdisk $DISK
+lsblk $DISK
 
 # FORMAT DISKS
+msg "Formatting disks..."
 mkfs.fat -F32 $DISK\1
 mkswap $DISK\3
 
 # ENCRYPT DISKS
+msg "Encrypting disks..."
 mkcrypt () {
     cryptsetup -y -v luksFormat $DISK\2
     if [ $? -eq  2 ]; then
@@ -58,9 +67,11 @@ mkcrypt
 opcrypt
 
 # FORMAT ENCRYPTED PARTITION
+msg "Formatting encrypted disk..."
 mkfs.ext4 -O "^has_journal" /dev/mapper/crypt
 
 # MOUNT
+msg "Mounting disks..."
 mount /dev/mapper/crypt /mnt
 if [ -d /mnt/boot ]
     then
@@ -72,9 +83,11 @@ fi
 swapon $DISK\3
 
 # UPDATE REPOS
+msg "Updating repos..."
 pacman -Syy
 
 # INSTALL
+msg "Installing..."
 time pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vi vim pacman dhcpcd git net-tools terminator
 
 # GET ENCRYPTED DISK UUID
@@ -82,50 +95,20 @@ UUID="$(blkid -s UUID -o value $DISK\2)"
 export UUID
 
 # CONFIGURE FSTAB
+msg "Configuring fstab..."
+genfstab -U /mnt
 genfstab -U /mnt > /mnt/etc/fstab
 
 # ADD SCRIPT TO CHROOT
+msg "Adding script to chroot..."
 cp ./chrootauto.sh /mnt/usr/local/bin/chrootauto
 
 # RUN SCRIPT
+msg "Running script in chroot..."
 arch-chroot /mnt chrootauto $DISK\2
 
-# CHROOT
-#
-
-# SETUP BOOTLOADER
-#cd
-#bootctl install
-#cp /boot/loader/loader.conf /boot/loader/loader.conf.bac
-#echo -e "timeout 5\ndefault arch" > /boot/loader/loader.conf
-#touch /boot/loader/entries/arch.conf
-#echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"options rw cryptdevice=UUID=$UUID":crypt" root=/dev/mapper/crypt > /boot/loader/entries/arch.conf
-#
-## MKINITCPIO
-##sed -i 's/oldstring/newstring/g' /etc/mkinitcpio.conf
-#cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bac
-#sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf resume shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
-#mkinitcpio -p linux
-#
-## USER
-#echo -n "Enter username: "
-#read UNAME
-#useradd -m -G audio,video,wheel $UNAME
-#echo "Changing user password."
-#passwd $UNAME
-#echo "Changing root password."
-#passwd
-#
-## BACKUP SUDOERS
-#mv /etc/sudoers /etc/sudoers.bac
-#
-## ADD USER TO SUDOERS GROUP
-#sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
-#
-## EXIT CHROOT
-##exit
-
 # UNSET VARIABLES
+msg "Unsetting variables..."
 unset DISK
 unset UUID
 unset UNAME
