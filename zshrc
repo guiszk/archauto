@@ -1,5 +1,5 @@
 autoload -U colors && colors
-PS1="%{$fg[green]%}%n%{$reset_color%}@%{$fg[white]%}%m %{$fg[blue]%}%~ %{$reset_color%}%% "
+PS1="%{$fg[green]%}%n%{$reset_color%}@%{$fg[white]%}%m %{$fg[cyan]%}%~ %{$reset_color%}%% "
 alias ls='ls -G'
 alias ll='ls -l'
 alias la='ls -la'
