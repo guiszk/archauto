@@ -105,7 +105,7 @@ cp ./chrootauto.sh /mnt/usr/local/bin/chrootauto
 
 # RUN SCRIPT
 msg "Running script in chroot..."
-arch-chroot /mnt chrootauto $DISK\2
+arch-chroot /mnt chrootauto $DISK
 
 # UNSET VARIABLES
 msg "Unsetting variables..."
