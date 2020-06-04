@@ -18,6 +18,12 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
+if ! (ping -c 1 archlinux.org || ping -c 1 github.com) &>/dev/null
+    then
+       echo "Connect to internet."
+       exit 1
+fi
+
 DISK=$1
 UUID="$(blkid -s UUID -o value $DISK\1)"
 export DISK
