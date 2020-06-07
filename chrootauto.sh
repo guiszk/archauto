@@ -58,10 +58,8 @@ msg "Creating user..."
 useradd -m -G audio,video,wheel $UNAME
 echo "Changing user password."
 pwcheck $UNAME
-#passwd $UNAME
 echo "Changing root password."
 pwcheck
-#passwd
 
 # BACKUP SUDOERS
 msg "Backing up sudoers..."
