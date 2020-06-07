@@ -35,7 +35,8 @@ umount /mnt/boot
 umount /mnt
 
 # PARTITION DISKS
-echo "o \nY \nn \n1 \n \n_512M \nEF00 \nn \n3 \n \n+1G \n8200 \nn \n2 \n \n \n8300 \nw \nY" | gdisk $DISK
+#echo "o \nY \nn \n1 \n \n_512M \nEF00 \nn \n3 \n \n+1G \n8200 \nn \n2 \n \n \n8300 \nw \nY" | gdisk $DISK
+echo "o \nY \nn \n1 \n \n+512M \nEF00 \nn \n \n \n \n8300 \np \nw \nY" | gdisk $DISK
 
 # FORMAT DISKS
 mkfs.fat -F32 $DISK\1
@@ -133,3 +134,4 @@ unset UNAME
 # STOP TIMER
 DURATION=$SECONDS
 echo "$(($DURATION / 60))m $(($DURATION % 60))s"
+echo "o \nY \nn \n1 \n \n+512M \nEF00 \nn \n \n \n \n8300 \np \nw \nY" | gdisk /dev/sdc
