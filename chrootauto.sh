@@ -57,6 +57,15 @@ pwcheck $UNAME
 echo "Changing root password."
 pwcheck
 
+# GIT
+echo -n "Enter git name: "
+read GITNAME
+echo -n "Enter git email: "
+read GITMAIL
+echo "Configuring git..."
+git config --global user.name "$GITNAME"
+git config --global user.email "$GITMAIL"
+
 # BACKUP SUDOERS
 echo "Backing up sudoers..."
 mv /etc/sudoers /etc/sudoers.bac
@@ -64,6 +73,13 @@ mv /etc/sudoers /etc/sudoers.bac
 # ADD USER TO SUDOERS GROUP
 echo "Editing sudoers..."
 sed "80i$UNAME ALL=(ALL) ALL" /etc/sudoers.bac  > /etc/sudoers
+
+# UNSET VARIABLES
+unset DISK
+unset UUID
+unset UNAME
+unset GITNAME
+unset GITMAIL
 
 # EXIT CHROOT
 echo "Exiting chroot..."
