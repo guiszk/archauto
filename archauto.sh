@@ -54,13 +54,13 @@ mkfs.fat -F32 $DISK\1
 echo "Encrypting disks..."
 mkcrypt () {
     cryptsetup -y -v luksFormat $DISK\2
-    if [ $? -eq  2 ]; then
+    if [ $? -ne  0 ]; then
         mkcrypt
     fi
 }
 opcrypt () {
     cryptsetup open $DISK\2 crypt
-    if [ $? -eq  2 ]; then
+    if [ $? -ne  0 ]; then
         opcrypt
     fi
 }
