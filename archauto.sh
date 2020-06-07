@@ -43,13 +43,12 @@ umount /mnt
 
 # PARTITION DISKS
 echo "Partitioning disks..."
-echo "o \nY \nn \n1 \n \n_512M \nEF00 \nn \n3 \n \n+1G \n8200 \nn \n2 \n \n \n8300 \nw \nY" | gdisk $DISK
+echo "o \nY \nn \n1 \n \n+512M \nEF00 \nn \n \n \n \n8300 \np \nw \nY" | gdisk $DISK
 lsblk $DISK
 
 # FORMAT DISKS
 echo "Formatting disks..."
 mkfs.fat -F32 $DISK\1
-mkswap $DISK\3
 
 # ENCRYPT DISKS
 echo "Encrypting disks..."
@@ -82,7 +81,6 @@ if [ -d /mnt/boot ]
         mkdir /mnt/boot
         mount $DISK\1 /mnt/boot
 fi
-swapon $DISK\3
 
 # UPDATE REPOS
 echo "Updating repos..."
