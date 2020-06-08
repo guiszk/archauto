@@ -66,6 +66,10 @@ echo "Configuring git..."
 git config --global user.name "$GITNAME"
 git config --global user.email "$GITMAIL"
 
+# TIMEZONE
+echo "Configuring timezone..."
+timedatectl set-timezone America/Sao_Paulo
+
 # BACKUP SUDOERS
 echo "Backing up sudoers..."
 mv /etc/sudoers /etc/sudoers.bac
