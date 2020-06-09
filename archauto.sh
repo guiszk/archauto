@@ -88,7 +88,7 @@ pacman -Syy
 
 # INSTALL
 echo "Installing..."
-time pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vi vim pacman dhcpcd git zsh net-tools netctl wpa_supplicant dialog terminator firefox
+time pacstrap /mnt base base-devel linux linux-firmware mkinitcpio vi vim pacman dhcpcd git zsh net-tools netctl wpa_supplicant dialog terminator
 
 # GET ENCRYPTED DISK UUID
 UUID="$(blkid -s UUID -o value $DISK\2)"
