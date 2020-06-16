@@ -37,7 +37,7 @@ echo -e "title ArchLinux\nlinux /vmlinuz-linux\ninitrd /initramfs-linux.img\n"op
 echo "Backing up mkinitcpio..."
 cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bac
 echo "Generating mkinitcpio..."
-sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf resume shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
+sed -i "s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev block keyboard autodetect modconf shutdown filesystems encrypt fsck keymap)/g" /etc/mkinitcpio.conf
 echo "Running mkinitcpio..."
 mkinitcpio -p linux
 
